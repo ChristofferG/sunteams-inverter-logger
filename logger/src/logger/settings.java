@@ -14,6 +14,7 @@ public class settings {
     public static final int AVERAGE = 0;
     public static final int PEAK = 1;
     public static final int INSTANT = 2;
+    static Logger logger = Logger.getLogger("settings");
 
     public static String getPort() {
         String port = config.getInstance().getFactory().getString("PORT", "BAD");
@@ -59,11 +60,14 @@ public class settings {
     public static int getMode() {
         String mode = config.getInstance().getFactory().getString("mode", "instant");
         if (mode.contentEquals("instant")) {
+            logger.debug("Mode is Instant");
             return INSTANT;
         }
         if (mode.contentEquals("average")) {
+            logger.debug("Mode is Average");
             return AVERAGE;
         }
+            logger.debug("Mode is Peak");
         return PEAK;
     }
 }
