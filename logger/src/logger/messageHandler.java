@@ -156,7 +156,7 @@ public class messageHandler extends Thread {
                 if (ENow > instPeak) {
                     instPeak = ENow;
                 }
-
+                logger.debug("Total:" + instTotal + " Samples:" + instNumber + " Peak:" + instPeak);
 
                 LogWriter lw = new LogWriter();
 
