@@ -17,6 +17,14 @@ public class messageHandler extends Thread {
     aFifoQueue data = aFifoQueue.getInstance();
     aMessageQueue msg = aMessageQueue.getInstance();
     Logger logger = Logger.getLogger(this.getClass().getName());
+    /*
+     * Used to calculate the value modes
+     * Easier to use global than pass them around
+     */
+    int instTotal = 0;
+    int instNumber = 0;
+    int instPeak = 0;
+    boolean instWrite = false;
 
     public void run() {
         LinkedList<Integer> ValuesRecieved = null;
@@ -26,6 +34,7 @@ public class messageHandler extends Thread {
         int[] sum = new int[2];
         int sumCount = 0;
         int dataCounter = -1;
+
 
         logger.info("Incoming Message Thread Started");
         int val = -1;
@@ -110,7 +119,7 @@ public class messageHandler extends Thread {
                 for (int x = 0; x < 8; x++) {
                     temp += String.format("0x%02X ", Header[x]);
                 }
-                logger.error(String.format("Size : 0x%02X  Data %s", Size,temp));
+                logger.error(String.format("Size : 0x%02X  Data %s", Size, temp));
                 msg.addMessage(typeMessage.UNKNOWN);
 
                 break;
@@ -129,18 +138,56 @@ public class messageHandler extends Thread {
                 double EToday = ((Data.get(12) * 256) + Data.get(13)) / 10.0;
                 double ETotal = ((Data.get(16) * 256) + Data.get(17)) / 10.0;
 
-                LogWriter lw = new LogWriter();
-                lw.WriteLine(date, ENow, ETotal, EToday, Temp);
+                /*
+                 * send a message to the queue if there was output from inverter
+                 */
                 if (ENow == 0) {
                     msg.addMessage(typeMessage.DATA_ZERO);
                 } else {
                     msg.addMessage(typeMessage.DATA_OK);
 
                 }
-                if (utils.get10Min(date)) {
+
+                /*
+                 * update counters
+                 */
+                instTotal += ENow;
+                instNumber++;
+                if (ENow > instPeak) {
+                    instPeak = ENow;
+                }
+
+
+                LogWriter lw = new LogWriter();
+
+                /*
+                 * Only do an upload if at a 10 minute interval and instWrite is false
+                 */
+                if (utils.get10Min(date) && instWrite == false) {
                     logger.info("Upload Values");
                     LogUploader lu = new LogUploader();
-                    lu.Upload(date, EToday,ENow);
+                    lu.Upload(date, EToday, ENow);
+                    /*
+                     * set the flag so not to do this twice in a row
+                     * if the timer happens to trigger trice in the
+                     * same minute
+                     */
+                    instWrite = true;
+
+                    lw.WriteDataToLog(date, ENow, ETotal, EToday, Temp);
+                    lw.WriteLine(date);
+
+                    /*
+                     * reset the counters
+                     */
+                    instTotal = 0;
+                    instNumber = 0;
+                    instPeak = 0;
+
+                } else {
+                    instWrite = false;
+                    lw.WriteDataToLog(date, ENow, ETotal, EToday, Temp);
+
                 }
 
                 break;
