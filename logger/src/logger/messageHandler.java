@@ -156,6 +156,8 @@ public class messageHandler extends Thread {
                 if (ENow > instPeak) {
                     instPeak = ENow;
                 }
+                int avg = instTotal / instNumber;
+
                 logger.debug("Total:" + instTotal + " Samples:" + instNumber + " Peak:" + instPeak);
 
                 LogWriter lw = new LogWriter();
@@ -164,7 +166,7 @@ public class messageHandler extends Thread {
                  * Only do an upload if at a 10 minute interval and instWrite is false
                  */
                 if (utils.get10Min(date) && instWrite == false) {
-                    logger.info("Upload Values");
+                    logger.info("Uploading Values");
                     LogUploader lu = new LogUploader();
                     lu.Upload(date, EToday, ENow);
                     /*
@@ -173,8 +175,7 @@ public class messageHandler extends Thread {
                      * same minute
                      */
                     instWrite = true;
-
-                    lw.WriteDataToLog(date, ENow, ETotal, EToday, Temp);
+                    lw.WriteDataToLog(date, ENow, instPeak, avg, ETotal, EToday, Temp);
                     lw.WriteLine(date);
 
                     /*
@@ -186,7 +187,7 @@ public class messageHandler extends Thread {
 
                 } else {
                     instWrite = false;
-                    lw.WriteDataToLog(date, ENow, ETotal, EToday, Temp);
+                    lw.WriteDataToLog(date, ENow, instPeak, avg, ETotal, EToday, Temp);
 
                 }
 

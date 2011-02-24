@@ -20,13 +20,14 @@ public class LogWriter {
 
     Logger logger = Logger.getLogger(this.getClass().getName());
 
-    public void WriteDataToLog(Date date, int Now, double eTotal, double eToday, double Temp) {
-        String x = String.format("%s %04d %07.1f %04.1f %03.1f\n", utils.getTime2(date), Now, eTotal, eToday, Temp);
-        logger.info("Write Values " + x);
+    public void WriteDataToLog(Date date, int Now, int Peak,int Avg,double eTotal, double eToday, double Temp) {
+        String x = String.format("%s %04d %04d %04d %07.1f %04.1f %03.1f", utils.getTime2(date), Now,Peak,Avg, eTotal, eToday, Temp);
+        logger.info("Write Values " + x );
         try {
             FileWriter write = new FileWriter(settings.getDailyFile()+"\\" + utils.getFileDate(date) + ".data", true);
-            PrintWriter print_line = new PrintWriter(write);
-            print_line.printf("%s %04d %07.1f %04.1f %03.1f\n", utils.getTime2(date), Now, eTotal, eToday, Temp);
+           PrintWriter print_line = new PrintWriter(write);
+//            print_line.printf("%s %04d %07.1f %04.1f %03.1f\n", utils.getTime2(date), Now, eTotal, eToday, Temp);
+            print_line.printf(x+"\n");
             print_line.close();
 
         } catch (Exception ex) {
@@ -37,7 +38,7 @@ public class LogWriter {
         try {
             FileWriter write = new FileWriter(settings.getDailyFile()+"\\" + utils.getFileDate(date) + ".data", true);
             PrintWriter print_line = new PrintWriter(write);
-            print_line.printf("=========================================================================\n");
+            print_line.printf("= Time   Inst Peak Avg  Total   Gen  Temp =\n");
             print_line.close();
 
         } catch (Exception ex) {
